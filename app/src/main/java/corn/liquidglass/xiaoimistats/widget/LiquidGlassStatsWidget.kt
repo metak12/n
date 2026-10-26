@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.widget.RemoteViews
 import com.liquidglass.xiaomistats.MainActivity
 import com.liquidglass.xiaomistats.R
@@ -15,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /**
  * Провайдер рабочего стола для виджета «Статистика» в стиле Liquid Glass.
@@ -34,6 +36,23 @@ class LiquidGlassStatsWidget : AppWidgetProvider() {
         scope.launch {
             try {
                 updateWidgets(context, appWidgetManager, appWidgetIds)
+            } finally {
+                pendingResult.finish()
+            }
+        }
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle
+    ) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+        val pendingResult = goAsync()
+        scope.launch {
+            try {
+                updateWidgets(context, appWidgetManager, intArrayOf(appWidgetId))
             } finally {
                 pendingResult.finish()
             }
@@ -80,14 +99,7 @@ class LiquidGlassStatsWidget : AppWidgetProvider() {
             val stats = repo.getTodayStats()
             val glassOpacity = repo.getGlassOpacity()
             val borderGlow = repo.getBorderGlow()
-
-            val glassCardBitmap = GlassRingRenderer.renderGlassCardBackground(
-                widthPx = 520,
-                heightPx = 520,
-                cornerRadiusPx = 112f,
-                glassOpacityPercent = glassOpacity,
-                borderGlowPercent = borderGlow
-            )
+            val density = context.resources.displayMetrics.density
 
             val ringBitmap = GlassRingRenderer.renderActivityRing(
                 sizePx = 260,
@@ -95,9 +107,25 @@ class LiquidGlassStatsWidget : AppWidgetProvider() {
             )
 
             for (widgetId in appWidgetIds) {
+                val options = appWidgetManager.getAppWidgetOptions(widgetId)
+                val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 150).coerceAtLeast(110)
+                val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 150).coerceAtLeast(110)
+
+                val widthPx = (minW * density * 1.5f).roundToInt().coerceIn(240, 960)
+                val heightPx = (minH * density * 1.5f).roundToInt().coerceIn(240, 960)
+                val cornerRadiusPx = 22f * density * 1.5f
+
+                val glassCardBitmap = GlassRingRenderer.renderGlassCardBackground(
+                    widthPx = widthPx,
+                    heightPx = heightPx,
+                    cornerRadiusPx = cornerRadiusPx,
+                    glassOpacityPercent = glassOpacity,
+                    borderGlowPercent = borderGlow
+                )
+
                 val views = RemoteViews(context.packageName, R.layout.widget_liquid_stats)
 
-                // Устанавливаем стеклянную подложку и кольцо прогресса
+                // Устанавливаем стеклянную подложку в точных пропорциях ячейки и кольцо прогресса
                 views.setImageViewBitmap(R.id.img_glass_background, glassCardBitmap)
                 views.setImageViewBitmap(R.id.img_activity_ring, ringBitmap)
 
