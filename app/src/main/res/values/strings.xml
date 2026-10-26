@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Статистика (Liquid Glass)</string>
+    <string name="widget_title">Статистика</string>
+    <string name="widget_description">Виджет шагомера Xiaomi в стиле жидкого стекла (Liquid Glass)</string>
+</resources>

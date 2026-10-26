@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.XiaomiLiquidGlass" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#FF6B4A</item>
+        <item name="colorPrimaryVariant">#E05334</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:statusBarColor">#0F141C</item>
+        <item name="android:navigationBarColor">#0F141C</item>
+    </style>
+</resources>
