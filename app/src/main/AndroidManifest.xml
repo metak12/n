@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Стандартное разрешение Android 10+ для чтения шагомера -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+    <!-- Разрешения для доступа к провайдеру шагов Xiaomi MIUI / HyperOS -->
+    <uses-permission android:name="com.miui.providers.steps.permission.READ_STEPS" />
+    <uses-permission android:name="miui.permission.READ_STEPS" />
+
+    <uses-feature
+        android:name="android.hardware.sensor.stepcounter"
+        android:required="false" />
+
+    <!-- Разрешаем видимость пакета провайдера шагов Xiaomi на Android 11+ -->
+    <queries>
+        <provider android:authorities="com.miui.providers.steps" />
+        <package android:name="com.mi.health" />
+        <package android:name="com.xiaomi.hm.health" />
+    </queries>
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.XiaomiLiquidGlass">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".widget.LiquidGlassStatsWidget"
+            android:exported="true"
+            android:label="@string/widget_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.liquidglass.xiaomistats.ACTION_REFRESH_STEPS" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/liquid_stats_widget_info" />
+        </receiver>
+
+    </application>
+
+</manifest>
